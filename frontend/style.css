@@ -15,10 +15,23 @@ body {
   line-height: 1.4;
 }
 
+.status-message h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.status-message p {
+  margin: 0.25rem 0;
+}
+
 .status-message.error {
   background-color: #fff3cd;
   border-color: #ffe69c;
   color: #664d03;
+}
+
+.status-message.error .ndvi-hint {
+  color: inherit;
 }
 
 .status-message a {
@@ -27,8 +40,34 @@ body {
   text-decoration: underline;
 }
 
+.ndvi-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.ndvi-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(8, 66, 152, 0.1);
+  text-decoration: none;
+}
+
+.status-message.error .ndvi-actions a {
+  background: rgba(102, 77, 3, 0.1);
+}
+
 .ndvi-summary {
   margin-top: 0.5rem;
+}
+
+.ndvi-hint {
+  font-size: 0.9rem;
+  color: rgba(8, 66, 152, 0.85);
 }
 
 .ndvi-stats {

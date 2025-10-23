@@ -26,10 +26,46 @@ function renderStatistics(stats = {}) {
   }
 
   return `
-    <div class="ndvi-stats" role="group" aria-label="Statistiques NDVI">
+    <section class="ndvi-stats" role="group" aria-label="Statistiques NDVI">
       <div><span class="label">Min</span><span class="value">${formatStat(min)}</span></div>
       <div><span class="label">Moyenne</span><span class="value">${formatStat(mean)}</span></div>
       <div><span class="label">Max</span><span class="value">${formatStat(max)}</span></div>
+    </section>
+  `;
+}
+
+function renderDownloadActions({ ndvi_file_url, ndvi_overlay_url, ndvi_file }) {
+  const links = [];
+
+  if (ndvi_file_url) {
+    links.push(`
+      <a href="${ndvi_file_url}" target="_blank" rel="noopener">
+        Télécharger le GeoTIFF
+      </a>
+    `);
+  }
+
+  if (ndvi_overlay_url) {
+    links.push(`
+      <a href="${ndvi_overlay_url}" target="_blank" rel="noopener">
+        Ouvrir la superposition PNG
+      </a>
+    `);
+  }
+
+  if (!links.length && ndvi_file) {
+    return `<p class="ndvi-hint">Fichier NDVI : ${ndvi_file}</p>`;
+  }
+
+  if (!links.length) {
+    return '';
+  }
+
+  const uniqueLinks = Array.from(new Set(links));
+
+  return `
+    <div class="ndvi-actions" role="group" aria-label="Actions NDVI">
+      ${uniqueLinks.join('')}
     </div>
   `;
 }
@@ -70,7 +106,11 @@ map.on(L.Draw.Event.CREATED, function (event) {
   drawnItems.addLayer(layer);
   const geojson = layer.toGeoJSON();
 
-  showStatus('Calcul du NDVI en cours, merci de patienter…');
+  showStatus(`
+    <h2>Analyse NDVI en cours…</h2>
+    <p>Nous récupérons les bandes Sentinel-2 et préparons le résultat. Cela peut
+    prendre quelques instants.</p>
+  `);
 
   fetch("http://localhost:5000/ndvi", {
     method: "POST",
@@ -93,15 +133,23 @@ map.on(L.Draw.Event.CREATED, function (event) {
       ndviOverlay.addTo(map);
       map.fitBounds(imageBounds);
 
-      const downloadUrl = data.ndvi_file_url || data.ndvi_overlay_url;
-      const downloadText = downloadUrl
-        ? `<a href="${downloadUrl}" target="_blank" rel="noopener">Télécharger le GeoTIFF</a>`
-        : data.ndvi_file;
-
       const statsHtml = renderStatistics(data.statistics);
-      showStatus(`NDVI prêt ! ${downloadText}${statsHtml ? `<div class="ndvi-summary">${statsHtml}</div>` : ''}`);
+      const actionsHtml = renderDownloadActions(data);
+
+      showStatus(`
+        <h2>Analyse NDVI terminée ✅</h2>
+        <p>La zone sélectionnée a été traitée avec succès. Vous pouvez télécharger les
+        fichiers générés ou explorer la carte pour visualiser la superposition.</p>
+        ${actionsHtml}
+        ${statsHtml ? `<div class="ndvi-summary">${statsHtml}</div>` : ''}
+      `);
     })
     .catch(error => {
-      showStatus(`Erreur : ${error.message}`, true);
+      showStatus(`
+        <h2>Analyse NDVI impossible ❌</h2>
+        <p>${error.message}</p>
+        <p class="ndvi-hint">Vérifiez votre connexion internet et assurez-vous que la
+        zone tracée se trouve dans une région couverte par Sentinel-2.</p>
+      `, true);
     });
 });
