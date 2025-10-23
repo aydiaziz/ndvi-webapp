@@ -27,8 +27,8 @@ def compute_ndvi(red_path, nir_path, output_dir="static/ndvi"):
         meta.update(dtype=rasterio.float32, count=1)
 
         uid = uuid.uuid4().hex
-        geotiff_path = output_dir / f"ndvi_{uid}.tif"
-        png_path = output_dir / f"ndvi_{uid}.png"
+        geotiff_path = (output_dir / f"ndvi_{uid}.tif").resolve()
+        png_path = (output_dir / f"ndvi_{uid}.png").resolve()
 
         with rasterio.open(geotiff_path, "w", **meta) as dst:
             dst.write(ndvi.astype(rasterio.float32), 1)

@@ -1,3 +1,4 @@
 backend/data/
-backend/static/ndvi/
+backend/static/ndvi/*.tif
+backend/static/ndvi/*.png
 __pycache__/
