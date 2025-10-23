@@ -80,7 +80,12 @@ def compute_ndvi(red_path, nir_path, output_dir="static/ndvi"):
         nir = nir_src.read(1).astype(np.float32)
 
         denominator = nir + red
-        valid_mask = denominator != 0
+        valid_mask = (
+            np.isfinite(red)
+            & np.isfinite(nir)
+            & np.isfinite(denominator)
+            & (denominator != 0)
+        )
 
         ndvi = np.full_like(red, np.nan, dtype=np.float32)
         np.divide(nir - red, denominator, out=ndvi, where=valid_mask)
