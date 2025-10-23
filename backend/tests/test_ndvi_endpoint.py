@@ -49,6 +49,15 @@ def test_ndvi_endpoint_serves_generated_overlay(client):
     parsed = urlparse(overlay_url)
     assert parsed.path.startswith("/static/ndvi/")
 
+    stats = data.get("statistics")
+    assert isinstance(stats, dict)
+    assert {"min", "max", "mean"}.issubset(stats)
+
+    numeric_values = [value for value in stats.values() if value is not None]
+    if numeric_values:
+        assert min(numeric_values) >= -1.0
+        assert max(numeric_values) <= 1.0
+
     overlay_response = client.get(parsed.path)
     assert overlay_response.status_code == 200
     assert overlay_response.data  # file should contain data

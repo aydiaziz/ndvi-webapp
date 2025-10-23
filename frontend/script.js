@@ -10,6 +10,30 @@ function showStatus(message, isError = false) {
   resultPanel.innerHTML = message;
 }
 
+function formatStat(value) {
+  if (value === null || Number.isNaN(value)) {
+    return 'N/A';
+  }
+
+  return Number.parseFloat(value).toFixed(3);
+}
+
+function renderStatistics(stats = {}) {
+  const { min = null, max = null, mean = null } = stats;
+
+  if (min === null && max === null && mean === null) {
+    return '';
+  }
+
+  return `
+    <div class="ndvi-stats" role="group" aria-label="Statistiques NDVI">
+      <div><span class="label">Min</span><span class="value">${formatStat(min)}</span></div>
+      <div><span class="label">Moyenne</span><span class="value">${formatStat(mean)}</span></div>
+      <div><span class="label">Max</span><span class="value">${formatStat(max)}</span></div>
+    </div>
+  `;
+}
+
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
@@ -73,7 +97,9 @@ map.on(L.Draw.Event.CREATED, function (event) {
       const downloadText = downloadUrl
         ? `<a href="${downloadUrl}" target="_blank" rel="noopener">Télécharger le GeoTIFF</a>`
         : data.ndvi_file;
-      showStatus(`NDVI prêt ! ${downloadText}`);
+
+      const statsHtml = renderStatistics(data.statistics);
+      showStatus(`NDVI prêt ! ${downloadText}${statsHtml ? `<div class="ndvi-summary">${statsHtml}</div>` : ''}`);
     })
     .catch(error => {
       showStatus(`Erreur : ${error.message}`, true);

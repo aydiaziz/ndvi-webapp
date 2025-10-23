@@ -26,3 +26,30 @@ body {
   font-weight: bold;
   text-decoration: underline;
 }
+
+.ndvi-summary {
+  margin-top: 0.5rem;
+}
+
+.ndvi-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(8, 66, 152, 0.2);
+}
+
+.ndvi-stats .label {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(8, 66, 152, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ndvi-stats .value {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
