@@ -36,7 +36,7 @@ map.on(L.Draw.Event.CREATED, function (event) {
   drawnItems.addLayer(layer);
   const geojson = layer.toGeoJSON();
 
-  fetch("/ndvi", {
+  fetch("http://localhost:5000/ndvi", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ geometry: geojson.geometry })

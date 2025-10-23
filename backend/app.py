@@ -4,10 +4,12 @@ from flask import Flask, jsonify, request, url_for
 
 from ndvi_utils import compute_ndvi
 from sentinel_api import download_sentinel_bands
+from flask_cors import CORS
+
 
 
 app = Flask(__name__)
-
+CORS(app)
 
 @app.route('/ndvi', methods=['POST'])
 def ndvi():
