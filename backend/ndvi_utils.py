@@ -39,7 +39,7 @@ def compute_ndvi(red_path, nir_path, output_dir="static/ndvi"):
         bounds = red_src.bounds
 
     return {
-        "geotiff_path": str(geotiff_path),
-        "png_path": str(png_path),
+        "geotiff_path": geotiff_path.as_posix(),
+        "png_path": png_path.as_posix(),
         "bounds": [bounds.bottom, bounds.left, bounds.top, bounds.right],
     }
