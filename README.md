@@ -1,10 +1,10 @@
 # NDVI WebApp
 
-The NDVI WebApp is a lightweight demonstration of how to calculate and visualize Normalized Difference Vegetation Index (NDVI) imagery in a browser. A small Flask backend generates synthetic Sentinel-2 bands, computes NDVI, and serves static overlays that the Leaflet-based frontend can display on top of a basemap.
+The NDVI WebApp is a lightweight demonstration of how to calculate and visualize Normalized Difference Vegetation Index (NDVI) imagery in a browser. A small Flask backend can either pull real Sentinel-2 L2A data from Sentinel Hub (when credentials are available) or generate synthetic bands, compute NDVI, and serve static overlays that the Leaflet-based frontend can display on top of a basemap.
 
 ## Features
 
-- **Automated NDVI generation** – The backend simulates downloading Sentinel-2 red (B04) and near-infrared (B08) bands and computes NDVI rasters from them.
+- **Automated NDVI generation** – The backend downloads Sentinel-2 red (B04) and near-infrared (B08) bands (with cloud masking when Sentinel Hub credentials are present) and computes NDVI rasters from them. When no credentials are supplied a deterministic synthetic scene is generated for demonstration purposes.
 - **GeoTIFF + PNG outputs** – Each NDVI request produces both a GeoTIFF asset for analysis and a contrast-stretched PNG overlay suitable for web maps.
 - **Simple frontend viewer** – The frontend (vanilla HTML/JS) lets you draw an area of interest, submit it to the backend, and display the returned NDVI overlay.
 - **CORS-enabled API** – Flask responses are CORS-enabled so the frontend can be served from the filesystem or another static host.
@@ -16,7 +16,7 @@ The NDVI WebApp is a lightweight demonstration of how to calculate and visualize
 ├── backend
 │   ├── app.py            # Flask application exposing the /ndvi API
 │   ├── ndvi_utils.py     # NDVI computation helpers
-│   ├── sentinel_api.py   # Synthetic Sentinel-2 band generator
+│   ├── sentinel_api.py   # Sentinel-2 integration & synthetic data fallback
 │   └── static/ndvi       # Generated NDVI assets (created at runtime)
 └── frontend
     └── index.html        # Leaflet application for map interaction
@@ -27,7 +27,22 @@ The NDVI WebApp is a lightweight demonstration of how to calculate and visualize
 - Python 3.9+
 - `pip` for dependency management
 
-The project does not require external Sentinel APIs. The backend produces deterministic synthetic scenes for demonstration purposes.
+The project works out-of-the-box without external APIs thanks to the synthetic data generator. To use live Sentinel-2 acquisitions configure Sentinel Hub credentials as described below.
+
+### Optional: enabling Sentinel Hub downloads
+
+When the following environment variables are present the backend will request real Sentinel-2 L2A data via the [Sentinel Hub Python SDK](https://github.com/sentinel-hub/sentinelhub-py):
+
+| Variable | Description |
+| --- | --- |
+| `SENTINELHUB_CLIENT_ID` & `SENTINELHUB_CLIENT_SECRET` | OAuth client credentials. |
+| `SENTINELHUB_INSTANCE_ID` | Alternative legacy authentication token (optional when OAuth is used). |
+| `SENTINELHUB_BASE_URL` | Custom Sentinel Hub base URL (optional). |
+| `SENTINELHUB_TIME_START` / `SENTINELHUB_TIME_END` | Explicit acquisition window (`YYYY-MM-DD`). Defaults to the most recent 30 days. |
+| `SENTINELHUB_LOOKBACK_DAYS` | Number of days to look back when the time interval is not specified (defaults to 30). |
+| `SENTINELHUB_RESOLUTION` | Spatial resolution in metres for the request grid (defaults to 10). |
+
+Pixels flagged as cloudy, snowy, or otherwise invalid in the Sentinel-2 Scene Classification Layer are masked out before the NDVI raster is produced, providing cleaner overlays for analysis.
 
 ## Getting started
 
