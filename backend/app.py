@@ -8,7 +8,8 @@ from flask_cors import CORS
 
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="backend/static")
+
 CORS(app)
 
 @app.route('/ndvi', methods=['POST'])
@@ -24,9 +25,8 @@ def ndvi():
         ndvi_result = compute_ndvi(red_band_path, nir_band_path)
 
         png_path = Path(ndvi_result["png_path"])
-        relative_png_path = png_path.relative_to("static").as_posix()
-        png_url = url_for("static", filename=relative_png_path)
-
+        png_filename = png_path.name  # just "ndvi_xxx.png"
+        png_url = url_for("static", filename=f"ndvi/{png_filename}")
         response_payload = {
             "status": "success",
             "ndvi_file": ndvi_result["geotiff_path"],
