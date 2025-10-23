@@ -1,0 +1,11 @@
+{
+  "app_name": "ndvi-webapp-frontend",
+  "description": "Static manifest for frontend debugging.",
+  "targets": [
+    {
+      "type": "web",
+      "title": "NDVI Web Application Frontend",
+      "url": "/index.html"
+    }
+  ]
+}
