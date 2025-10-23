@@ -7,8 +7,10 @@ from sentinel_api import download_sentinel_bands
 from flask_cors import CORS
 
 
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR.parent / "static"
 
-app = Flask(__name__, static_folder="backend/static")
+app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="/static")
 
 CORS(app)
 
@@ -22,11 +24,13 @@ def ndvi():
             raise ValueError("Missing geometry in request body")
 
         red_band_path, nir_band_path = download_sentinel_bands(geometry)
-        ndvi_result = compute_ndvi(red_band_path, nir_band_path)
+        ndvi_result = compute_ndvi(
+            red_band_path, nir_band_path, output_dir=STATIC_DIR / "ndvi"
+        )
 
         png_path = Path(ndvi_result["png_path"])
         png_filename = png_path.name  # just "ndvi_xxx.png"
-        png_url = url_for("static", filename=f"ndvi/{png_filename}")
+        png_url = url_for("static", filename=f"ndvi/{png_filename}", _external=True)
         response_payload = {
             "status": "success",
             "ndvi_file": ndvi_result["geotiff_path"],
