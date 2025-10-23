@@ -65,3 +65,17 @@ def test_ndvi_endpoint_serves_generated_overlay(client):
         assert geotiff_path.exists()
     finally:
         _cleanup_generated_files(png_path, geotiff_path)
+
+
+def test_chrome_devtools_manifest_available(client):
+    response = client.get("/.well-known/appspecific/com.chrome.devtools.json")
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert payload["app_name"] == "ndvi-webapp"
+    assert payload["targets"], "Expected at least one debugging target"
+
+    first_target = payload["targets"][0]
+    assert first_target["type"] == "web"
+    assert first_target["title"]
+    assert first_target["url"].endswith("/")

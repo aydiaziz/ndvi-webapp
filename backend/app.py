@@ -29,6 +29,27 @@ app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="/static")
 CORS(app)
 
 
+@app.route("/.well-known/appspecific/com.chrome.devtools.json", methods=["GET"])
+def chrome_devtools_manifest():
+    """Expose a Chrome DevTools manifest to satisfy discovery requests."""
+
+    base_url = request.url_root.rstrip("/")
+
+    return jsonify(
+        {
+            "app_name": "ndvi-webapp",
+            "description": "Remote debugging configuration for the NDVI web application.",
+            "targets": [
+                {
+                    "type": "web",
+                    "title": "NDVI Web Application",
+                    "url": f"{base_url}/",
+                }
+            ],
+        }
+    )
+
+
 def _relative_to_static(path: Path) -> str:
     """Return a path relative to the Flask static directory."""
 
