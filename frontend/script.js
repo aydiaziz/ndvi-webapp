@@ -1,4 +1,14 @@
 const map = L.map('map').setView([36.8065, 10.1815], 11);
+const resultPanel = document.getElementById('ndvi-result');
+
+function showStatus(message, isError = false) {
+  if (!resultPanel) {
+    return;
+  }
+
+  resultPanel.classList.toggle('error', isError);
+  resultPanel.innerHTML = message;
+}
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -36,6 +46,8 @@ map.on(L.Draw.Event.CREATED, function (event) {
   drawnItems.addLayer(layer);
   const geojson = layer.toGeoJSON();
 
+  showStatus('Calcul du NDVI en cours, merci de patienter…');
+
   fetch("http://localhost:5000/ndvi", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -57,9 +69,13 @@ map.on(L.Draw.Event.CREATED, function (event) {
       ndviOverlay.addTo(map);
       map.fitBounds(imageBounds);
 
-      alert("NDVI prêt ! Fichier GeoTIFF: " + data.ndvi_file);
+      const downloadUrl = data.ndvi_file_url || data.ndvi_overlay_url;
+      const downloadText = downloadUrl
+        ? `<a href="${downloadUrl}" target="_blank" rel="noopener">Télécharger le GeoTIFF</a>`
+        : data.ndvi_file;
+      showStatus(`NDVI prêt ! ${downloadText}`);
     })
     .catch(error => {
-      alert(error.message);
+      showStatus(`Erreur : ${error.message}`, true);
     });
 });

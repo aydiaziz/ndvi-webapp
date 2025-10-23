@@ -15,6 +15,21 @@ except ModuleNotFoundError:  # pragma: no cover - fallback when flask-cors is mi
     def CORS(app, *_, **__):
         """Gracefully degrade when flask-cors is unavailable."""
 
+        @app.after_request
+        def add_cors_headers(response):  # pragma: no cover - simple fallback
+            response.headers.setdefault("Access-Control-Allow-Origin", "*")
+            response.headers.setdefault("Access-Control-Allow-Headers", "Content-Type")
+            response.headers.setdefault(
+                "Access-Control-Allow-Methods", "GET,POST,OPTIONS"
+            )
+            return response
+
+        @app.before_request
+        def handle_preflight():  # pragma: no cover - simple fallback
+            if request.method == "OPTIONS":
+                response = app.make_default_options_response()
+                return add_cors_headers(response)
+
         return app
 
 
@@ -58,8 +73,11 @@ def _relative_to_static(path: Path) -> str:
     except ValueError:
         return path.name
 
-@app.route('/ndvi', methods=['POST'])
+@app.route('/ndvi', methods=['POST', 'OPTIONS'])
 def ndvi():
+    if request.method == "OPTIONS":  # pragma: no cover - handled by browser preflight
+        return ("", 204)
+
     data = request.get_json(silent=True) or {}
     geometry = data.get("geometry")
 
@@ -79,9 +97,11 @@ def ndvi():
         geotiff_rel_path = _relative_to_static(geotiff_path)
 
         png_url = url_for("static", filename=png_rel_path, _external=True)
+        geotiff_url = url_for("static", filename=geotiff_rel_path, _external=True)
         response_payload = {
             "status": "success",
             "ndvi_file": f"static/{geotiff_rel_path}",
+            "ndvi_file_url": geotiff_url,
             "ndvi_overlay_url": png_url,
             "bounds": ndvi_result["bounds"],
         }
