@@ -1,1 +1,2 @@
-ndvi/
+ndvi/*.tif
+ndvi/*.png
