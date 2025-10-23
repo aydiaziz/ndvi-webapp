@@ -104,6 +104,7 @@ def ndvi():
             "ndvi_file_url": geotiff_url,
             "ndvi_overlay_url": png_url,
             "bounds": ndvi_result["bounds"],
+            "statistics": ndvi_result.get("statistics", {}),
         }
 
         return jsonify(response_payload)
